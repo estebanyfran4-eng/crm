@@ -1,0 +1,3 @@
+const DB=(()=>{let db;const open=()=>db?Promise.resolve(db):new Promise((res,rej)=>{const r=indexedDB.open('crm-db',1);r.onupgradeneeded=()=>r.result.createObjectStore('clients',{keyPath:'id'});r.onsuccess=()=>res(db=r.result);r.onerror=()=>rej(r.error)});
+const tx=async(m,f)=>{const d=await open();return new Promise((res,rej)=>{const t=d.transaction('clients',m),s=t.objectStore('clients'),r=f(s);t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})};
+return{all:()=>tx('readonly',s=>s.getAll()),put:c=>tx('readwrite',s=>s.put(c)),del:id=>tx('readwrite',s=>s.delete(id)),clear:()=>tx('readwrite',s=>s.clear()),bulk:a=>tx('readwrite',s=>{a.forEach(x=>s.put(x))})}})();
